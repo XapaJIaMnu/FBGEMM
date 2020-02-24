@@ -14,29 +14,11 @@
 namespace fbgemm {
 #ifdef _MSC_VER
 # define ALWAYS_INLINE // __forceinline
-inline void *genericMalloc(size_t alignment, size_t size) {
-  void *ret = _aligned_malloc(size, alignment);
-  ABORT_IF(!ret, "Failed to allocate memory on CPU");
-  return ret;
-}
-inline void genericFree(void *ptr) {
-  _aligned_free(ptr);
-}
 #else
 # define ALWAYS_INLINE __attribute__((always_inline))
-inline void *genericMalloc(size_t alignment, size_t size) {
-  // On macos, aligned_alloc is available only on c++17
-  // Furthermore, it requires that the memory requested is an exact multiple of the alignment, otherwise it fails.
-  // posix_memalign is available on both Mac (Since 2016) and Linux and in both gcc and clang
-  void *result = nullptr;
-  posix_memalign(&result, alignment, size);
-  return result;
-}
-inline void genericFree(void *ptr) {
-  free(ptr);
-}
 #endif
-
+void *genericMalloc(size_t alignment, size_t size);
+void genericFree(void *ptr);
 
 
 /**
