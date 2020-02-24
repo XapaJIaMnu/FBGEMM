@@ -20,7 +20,10 @@ namespace fbgemm {
 #ifdef _MSC_VER
 void *genericMalloc(size_t alignment, size_t size) {
   void *ret = _aligned_malloc(size, alignment);
-  ABORT_IF(!ret, "Failed to allocate memory on CPU");
+  if (!ret) {
+    std::cerr << "Memory allocation failed!" << std::endl;
+    std::exit(1);
+  }
   return ret;
 }
 void genericFree(void *ptr) {
@@ -32,7 +35,11 @@ void *genericMalloc(size_t alignment, size_t size) {
   // Furthermore, it requires that the memory requested is an exact multiple of the alignment, otherwise it fails.
   // posix_memalign is available on both Mac (Since 2016) and Linux and in both gcc and clang
   void *result = nullptr;
-  posix_memalign(&result, alignment, size);
+  int success = posix_memalign(&result, alignment, size);
+  if (success != 0) {
+    std::cerr << "Memory allocation failed!" << std::endl;
+    std::exit(1);
+  }
   return result;
 }
 void genericFree(void *ptr) {
